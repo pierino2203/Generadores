@@ -3,8 +3,8 @@ import { NavLink } from "react-router-dom";
 
 export default function Home() {
     return (
-        <div>
-            <h1>Generacion de numeros pseudoaleatorios</h1>
+        <div className="container">
+            <h1 className="color-white">Generacion de numeros pseudoaleatorios</h1>
             <h2>Elija el metodo de Generacion:</h2>
             <button><NavLink to={"/central"}>Parte Central Cuadrado</NavLink></button>
             <button><NavLink to={"/lehmer"}>Lehmer</NavLink></button>
