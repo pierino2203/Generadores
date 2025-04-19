@@ -38,28 +38,29 @@ export default function ParteCentralCuadrado() {
 
     function handleSubmit(e) {
         e.preventDefault(e);
-        
+
         // Validar que todos los campos estén completos
         if (!input.semilla || !input.n || !input.cantidad) {
             setErrorMessage('Por favor, ingrese todos los datos requeridos')
             setShowError(true)
             return
         }
-        
+
         // Validar que los valores sean números positivos
         if (parseInt(input.semilla) <= 0 || parseInt(input.n) <= 0 || parseInt(input.cantidad) <= 0) {
             setErrorMessage('Todos los valores deben ser números positivos')
             setShowError(true)
             return
         }
-        
+
         var resultadosArray = [];
         let semillaActual = parseInt(input.semilla);
         let cantidadRestante = parseInt(input.cantidad);
         let n = parseInt(input.n);
-        
+
         while (cantidadRestante > 0) {
             var x = semillaActual ** 2;
+            console.log(x)
             const digitos = x.toString().length
             if (digitos < n) {
                 setErrorMessage('La cantidad de dígitos es menor que N, no se puede seguir calculando')
@@ -72,26 +73,28 @@ export default function ParteCentralCuadrado() {
                 resultadosArray.push({
                     x: x,
                     Ndigitos: digitos,
+                    n: n,
                     paridad: "PAR",
                     semillaN: res,
                     u: Number((res / Math.pow(10, n)).toFixed(n))
                 })
                 semillaActual = res;
             } else {
-                x = x * 10
-                const res = obtenerCentrales(x, n)
+                const res = obtenerCentrales(x * 10, n)
                 resultadosArray.push({
                     x: x,
                     Ndigitos: digitos,
+                    n: n,
                     paridad: "IMPAR",
                     semillaN: res,
                     u: Number((res / Math.pow(10, n)).toFixed(n))
                 })
                 semillaActual = res;
             }
+            console.log(resultadosArray)
             cantidadRestante--;
         }
-        
+
         if (resultadosArray.length > 0) {
             setResultados(resultadosArray);
             setShowModal(true);
@@ -106,17 +109,17 @@ export default function ParteCentralCuadrado() {
     const handleClose = () => setShowModal(false);
 
     return (
-        <Container className="mt-5 p-4 bg-light rounded shadow-sm" style={{maxWidth: '800px'}}>
+        <Container className="mt-5 p-4 bg-light rounded shadow-sm" style={{ maxWidth: '800px' }}>
             <h1 className="text-primary text-center mb-4">Parte Central del Cuadrado</h1>
             <h2 className="text-primary text-center mb-4 fs-4">Ingrese los datos</h2>
-            
+
             {showError && (
                 <Alert variant="danger" onClose={() => setShowError(false)} dismissible className="mb-4">
                     <Alert.Heading>Error</Alert.Heading>
                     <p>{errorMessage}</p>
                 </Alert>
             )}
-            
+
             <Form onSubmit={handleSubmit} className="bg-white p-4 rounded">
                 <Row className="mb-4 justify-content-center">
                     <Col md={4} className="mb-3">
@@ -163,8 +166,8 @@ export default function ParteCentralCuadrado() {
                     </Col>
                 </Row>
                 <div className="text-center">
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         variant="primary"
                         size="lg"
                         className="px-4"
@@ -193,8 +196,20 @@ export default function ParteCentralCuadrado() {
                                         <strong>N dígitos:</strong> {resultado.Ndigitos}
                                     </Card.Text>
                                     <Card.Text className="mb-1">
+                                        <strong>{resultado.Ndigitos}-{resultado.n}=:</strong> {resultado.Ndigitos - resultado.n}
+                                    </Card.Text>
+                                    <Card.Text className="mb-1">
                                         <strong>Paridad:</strong> {resultado.paridad}
                                     </Card.Text>
+                                    {
+                                        resultado.paridad === "IMPAR" ?
+                                            <Card.Text className="mb-1">
+                                                <strong>{resultado.x}*10=</strong> {resultado.x * 10}
+                                            </Card.Text>
+                                            : <Card.Text className="mb-1">
+                                                <strong>{resultado.x}=</strong> {resultado.x}
+                                            </Card.Text>
+                                    }
                                     <Card.Text className="mb-1">
                                         <strong>Semilla N:</strong> {resultado.semillaN}
                                     </Card.Text>

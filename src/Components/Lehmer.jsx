@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Container, Row, Col, Button, Modal, Table, Form } from 'react-bootstrap'
+import { Container, Row, Col, Button, Modal, Form, Card, Alert } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 export default function Lehmer() {
@@ -9,7 +9,9 @@ export default function Lehmer() {
         cantidad: 0
     })
     const [resultados, setResultados] = useState([])
-
+    const [showModal, setShowModal] = useState(false)
+    const [showError, setShowError] = useState(false)
+    const handleClose = () => setShowModal(false);
     function handleChange(e) {
         setInput({
             ...input,
@@ -26,14 +28,14 @@ export default function Lehmer() {
             let numero1 = 0
             let numero2 = 0
             let nuevaSemilla = 0
-            
+
 
             while (input.cantidad > 0) {
                 const k = input.t.toString().length
-                nuevoNumero = num*input.t
-                numero1 = nuevoNumero.toString().slice(0,k)
+                nuevoNumero = num * input.t
+                numero1 = nuevoNumero.toString().slice(0, k)
                 numero2 = nuevoNumero.toString().slice(k)
-                nuevaSemilla = parseInt(numero2)-parseInt(numero1)
+                nuevaSemilla = parseInt(numero2) - parseInt(numero1)
                 resultadosArray.push({
                     n: parseInt(num),
                     t: parseInt(input.t),
@@ -41,18 +43,22 @@ export default function Lehmer() {
                     numero1: parseInt(numero1),
                     numero2: parseInt(numero2),
                     nuevaSemilla: parseInt(nuevaSemilla),
-                    u: nuevaSemilla/Math.pow(10,nuevaSemilla.toString().length)
+                    u: nuevaSemilla / Math.pow(10, nuevaSemilla.toString().length)
 
                 })
                 num = nuevaSemilla
                 input.cantidad--
             }
             console.log(resultadosArray)
-            setInput({
-                n: 0,
-                t: 0,
-                cantidad: 0
-            })
+            if (resultadosArray.length > 0) {
+                setResultados(resultadosArray)
+                setShowModal(true);
+                setInput({
+                    n: 0,
+                    t: 0,
+                    cantidad: 0
+                })
+            }
         } else {
             console.log("Ingrese todos los datos requeridos")
         }
@@ -115,6 +121,47 @@ export default function Lehmer() {
                     </Button>
                 </div>
             </Form>
+            <Modal show={showModal} onHide={handleClose} size="xl" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Resultados - Lehmer</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="d-flex flex-wrap justify-content-center gap-2">
+                        {resultados.map((resultado, index) => (
+                            <Card key={index} className="mb-2" style={{ width: '25rem' }}>
+                                <Card.Header className="bg-primary text-white text-center py-2">
+                                    Número {index + 1}
+                                </Card.Header>
+                                <Card.Body className="p-2">
+                                    <Card.Text className="mb-1">
+                                        <strong>n{index}=</strong>{resultado.n}
+                                    </Card.Text>
+                                    <Card.Text className="mb-1">
+                                        <strong>t=</strong>{resultado.t}
+                                    </Card.Text>
+                                    <Card.Text className="mb-1">
+                                        <strong>n{index}*k=</strong>{resultado.n}*{resultado.k}={resultado.n*resultado.t}
+                                    </Card.Text>
+                                    <Card.Text className="mb-1">
+                                        <strong>Separamos n{index}*t, k={resultados.k} digitos de la izq=</strong> {resultado.numero1}----{resultado.numero2}
+                                    </Card.Text>
+                                    <Card.Text className="mb-1">
+                                        <strong>n{index+1}=</strong>{resultado.numero1}-{resultado.numero2}={resultado.nuevaSemilla}
+                                    </Card.Text>
+                                    <Card.Text className="mb-1">
+                                        <strong>u{index+1}=</strong> {resultado.u}
+                                    </Card.Text>
+                                </Card.Body>
+                            </Card>
+                        ))}
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     )
 }
