@@ -10,6 +10,7 @@ import Promedios from './Components/Promedios'
 import Frecuencias from './Components/Frecuencias'
 import Ks from './Components/K-S'
 import Serie from './Components/Serie'
+import Corrida from './Components/Corrida'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/frecuencia" element={<Frecuencias/>}/>
         <Route path="/ks" element={<Ks/>}/>
         <Route path='/serie' element={<Serie/>}/>
+        <Route path='/corrida' element={<Corrida/>}/>
       </Routes>
     </Router>
   )

@@ -39,17 +39,20 @@ export default function Home() {
                 <Card.Body>
                     <h3 className="mb-3">Elija el tipo de prueba</h3>
                     <div className="home-buttons">
-                        <Button as={NavLink} to="/promedios" variant="primary" className="mb-2">
+                        <Button as={NavLink} to="/promedios" variant="primary" className="mb-1">
                             Prueba de Promedios
                         </Button>
-                        <Button as={NavLink} to="/frecuencia" variant="primary" className="mb-2">
+                        <Button as={NavLink} to="/frecuencia" variant="primary" className="mb-1">
                             Prueba de Frecuencias
                         </Button>
-                        <Button as={NavLink} to="/serie" variant="primary" className="mb-2">
+                        <Button as={NavLink} to="/serie" variant="primary" className="mb-1">
                             Prueba de Series
                         </Button>
-                        <Button as={NavLink} to="/ks" variant="primary" className="mb-2">
+                        <Button as={NavLink} to="/ks" variant="primary" className="mb-1">
                             Prueba K-S
+                        </Button>
+                        <Button as={NavLink} to="/corrida" variant="primary" className="mb-1">
+                            Prueba de Corrida
                         </Button>
                     </div>
                 </Card.Body>
