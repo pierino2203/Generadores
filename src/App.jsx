@@ -7,6 +7,7 @@ import GenAditivo from './Components/GenAditivo'
 import './App.css'
 import Lehmer from './Components/Lehmer'
 import Promedios from './Components/Promedios'
+import Frecuencias from './Components/Frecuencias'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/multiplicativo" element={<GenMultiplicativo />} />
         <Route path="/mixto" element={<GenCongruencialMixto />} />
         <Route path="/promedios" element={<Promedios/>}/>
+        <Route path="/frecuencia" element={<Frecuencias/>}/>
       </Routes>
     </Router>
   )
