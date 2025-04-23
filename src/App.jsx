@@ -9,6 +9,7 @@ import Lehmer from './Components/Lehmer'
 import Promedios from './Components/Promedios'
 import Frecuencias from './Components/Frecuencias'
 import Ks from './Components/K-S'
+import Serie from './Components/Serie'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/promedios" element={<Promedios/>}/>
         <Route path="/frecuencia" element={<Frecuencias/>}/>
         <Route path="/ks" element={<Ks/>}/>
+        <Route path='/serie' element={<Serie/>}/>
       </Routes>
     </Router>
   )
