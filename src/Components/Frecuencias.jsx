@@ -68,6 +68,7 @@ export default function Frecuencias() {
             var s = (e.frecuencia - Fe)**2
             return s
           })
+          console.log(sum)
         var X2 = (parseInt(x)/parseInt(n))*(sum.reduce((total, current) => total + current, 0))
         console.log(X2)
         const comp = parseFloat(x2a)

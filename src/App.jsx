@@ -8,6 +8,7 @@ import './App.css'
 import Lehmer from './Components/Lehmer'
 import Promedios from './Components/Promedios'
 import Frecuencias from './Components/Frecuencias'
+import Ks from './Components/K-S'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/mixto" element={<GenCongruencialMixto />} />
         <Route path="/promedios" element={<Promedios/>}/>
         <Route path="/frecuencia" element={<Frecuencias/>}/>
+        <Route path="/ks" element={<Ks/>}/>
       </Routes>
     </Router>
   )
