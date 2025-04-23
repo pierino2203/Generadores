@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Modal, Table } from 'react-bootstrap';
+import { Container, Form, Button, Modal, Table, Card, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function Corrida() {
@@ -8,6 +8,7 @@ export default function Corrida() {
   const [xa, setXa] = useState("");
   const [result, setResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleNChange = (e) => {
     const value = parseInt(e.target.value);
@@ -15,6 +16,11 @@ export default function Corrida() {
       setN(value);
       setValues(new Array(value).fill(""));
       setResult(null);
+      setErrors({});
+    } else {
+      setN("");
+      setValues([]);
+      setErrors({ n: "El valor debe ser mayor que 0" });
     }
   };
 
@@ -22,10 +28,31 @@ export default function Corrida() {
     const newValues = [...values];
     newValues[index] = value;
     setValues(newValues);
+    
+    // Validar que el valor esté entre 0 y 1
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0 || num > 1) {
+      setErrors({...errors, [`value${index}`]: "El valor debe estar entre 0 y 1"});
+    } else {
+      const newErrors = {...errors};
+      delete newErrors[`value${index}`];
+      setErrors(newErrors);
+    }
   };
 
   const handleXaChange = (e) => {
-    setXa(e.target.value);
+    const value = e.target.value;
+    setXa(value);
+    
+    // Validar que el valor sea mayor que 0
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) {
+      setErrors({...errors, xa: "El valor debe ser mayor que 0"});
+    } else {
+      const newErrors = {...errors};
+      delete newErrors.xa;
+      setErrors(newErrors);
+    }
   };
 
   const obtenerFrecuenciasDeRachas = (secuencia) => {
@@ -60,9 +87,26 @@ export default function Corrida() {
   };
 
   const compareValues = () => {
-    const numeros = values.map(v => parseFloat(v)).filter(v => !isNaN(v));
-    if (numeros.length !== parseInt(n)) return;
-
+    // Validar que todos los valores estén completos
+    if (values.some(v => v === "")) {
+      setErrors({...errors, values: "Todos los valores deben estar completos"});
+      return;
+    }
+    
+    // Validar que todos los valores estén entre 0 y 1
+    const numeros = values.map(v => parseFloat(v));
+    if (numeros.some(isNaN) || numeros.some(n => n < 0 || n > 1)) {
+      setErrors({...errors, values: "Todos los valores deben estar entre 0 y 1"});
+      return;
+    }
+    
+    // Validar que xa sea un número mayor que 0
+    const xaNum = parseFloat(xa);
+    if (isNaN(xaNum) || xaNum <= 0) {
+      setErrors({...errors, xa: "El valor de χ²ₐ debe ser mayor que 0"});
+      return;
+    }
+    
     const binaria = numeros.map(v => (v > 0.5 ? 1 : 0));
     const fo = obtenerFrecuenciasDeRachas(binaria);
     const { chi2, fePorLongitud } = calcularChiCuadrado(fo, numeros.length);
@@ -74,67 +118,112 @@ export default function Corrida() {
   const handleClose = () => setShowModal(false);
 
   return (
-    <Container className="py-4">
-      <h1 className="mb-4">Prueba de corrida (arriba y abajo de la media)</h1>
+    <Container className="mt-4">
+      <Card className="shadow-sm">
+        <Card.Header>
+          <h2 className="mb-0 text-center">Prueba de Corrida</h2>
+        </Card.Header>
+        <Card.Body>
+          <h3 className="text-center mb-4">Ingrese los datos</h3>
+          
+          <Form>
+            <Form.Group className="mb-4">
+              <Form.Label><h4>Ingrese un número entero positivo (n):</h4></Form.Label>
+              <Form.Control
+                type="number"
+                min="1"
+                value={n}
+                onChange={handleNChange}
+                isInvalid={!!errors.n}
+              />
+              {errors.n && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.n}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
 
-      <Form className="mb-4">
-        <Form.Group className="mb-3">
-          <Form.Label>Ingrese un número entero positivo (n):</Form.Label>
-          <Form.Control
-            type="number"
-            min="1"
-            value={n}
-            onChange={handleNChange}
-          />
-        </Form.Group>
-
-        {n > 0 && (
-          <div className="mb-3">
-            <h4>Ingrese {n} valores entre 0 y 1:</h4>
-            <div className="row">
-              {values.map((value, index) => (
-                <div key={index} className="col-md-6 mb-2">
-                  <Form.Group>
-                    <Form.Label>Valor {index + 1}:</Form.Label>
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      max="1"
-                      step="any"
-                      value={value}
-                      onChange={(e) => handleValueChange(index, e.target.value)}
-                    />
-                  </Form.Group>
+            {n > 0 && (
+              <Form.Group className="mb-4">
+                <h4>Ingrese {n} valores entre 0 y 1:</h4>
+                <div className="row">
+                  {values.map((value, index) => (
+                    <div key={index} className="col-md-6 mb-2">
+                      <Form.Group>
+                        <Form.Label>u {index + 1}:</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="any"
+                          value={value}
+                          onChange={(e) => handleValueChange(index, e.target.value)}
+                          isInvalid={!!errors[`value${index}`]}
+                        />
+                        {errors[`value${index}`] && (
+                          <Form.Control.Feedback type="invalid">
+                            {errors[`value${index}`]}
+                          </Form.Control.Feedback>
+                        )}
+                      </Form.Group>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                {errors.values && (
+                  <Alert variant="danger" className="mt-2">
+                    {errors.values}
+                  </Alert>
+                )}
+              </Form.Group>
+            )}
+
+            <Form.Group className="mb-4">
+              <Form.Label><h4>Ingrese χ²ₐ:</h4></Form.Label>
+              <Form.Control
+                type="number"
+                min="0"
+                step="any"
+                value={xa}
+                onChange={handleXaChange}
+                isInvalid={!!errors.xa}
+              />
+              {errors.xa && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.xa}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <div className="text-center">
+              <Button 
+                variant="primary" 
+                onClick={compareValues}
+                size="lg"
+                className="px-4"
+              >
+                Calcular
+              </Button>
             </div>
-          </div>
-        )}
-
-        <Form.Group className="mb-3">
-          <Form.Label>Ingrese un valor crítico χ²ₐ:</Form.Label>
-          <Form.Control
-            type="number"
-            min="0"
-            step="any"
-            value={xa}
-            onChange={handleXaChange}
-          />
-        </Form.Group>
-
-        <Button variant="primary" onClick={compareValues}>
-          Calcular
-        </Button>
-      </Form>
+          </Form>
+        </Card.Body>
+      </Card>
 
       <Modal show={showModal} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Resultados de la Prueba de Corrida</Modal.Title>
+          <Modal.Title className="text-center w-100">Resultados de la Prueba de Corrida</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {result && (
             <>
-              <Table striped bordered>
+              <h4>Datos ingresados:</h4>
+              <p><strong>Tamaño de la muestra (n):</strong> {n}</p>
+              <p><strong>Valor de χ²ₐ:</strong> {xa}</p>
+              
+              <h4 className="mt-3">Secuencia binaria:</h4>
+              <p>{result.binaria.join(" ")}</p>
+              
+              <h4 className="mt-3">Frecuencias de rachas:</h4>
+              <Table striped bordered hover size="sm">
                 <thead>
                   <tr>
                     <th>Longitud de Racha</th>
@@ -152,15 +241,16 @@ export default function Corrida() {
                   ))}
                 </tbody>
               </Table>
-              <p><strong>Secuencia binaria:</strong> {result.binaria.join(" ")}</p>
+              
+              <h4 className="mt-3">Resultados:</h4>
               <p><strong>Estadístico χ²:</strong> {result.chi2.toFixed(4)}</p>
-              {xa && (
-                <p>
-                  <strong>χ² crítico (Xa):</strong> {xa} → {result.chi2 < parseFloat(xa)
-                    ? "No se rechaza H₀ (distribución aleatoria)"
-                    : "Se rechaza H₀ (no aleatoria)"}
-                </p>
-              )}
+              
+              <Alert variant={result.chi2 < parseFloat(xa) ? "success" : "danger"} className="mt-3">
+                <strong>Conclusión:</strong><br />
+                {result.chi2 < parseFloat(xa)
+                  ? "No se rechaza H₀ (distribución aleatoria)"
+                  : "Se rechaza H₀ (no aleatoria)"}
+              </Alert>
             </>
           )}
         </Modal.Body>

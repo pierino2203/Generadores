@@ -95,6 +95,7 @@ export default function Ks() {
                                         <div className="row">
                                             {numeros.map((numero, index) => (
                                                 <Col md={4} key={index} className="mb-2">
+                                                    <Form.Label>u{index+1}</Form.Label>
                                                     <Form.Control
                                                         type="number"
                                                         value={numero}
