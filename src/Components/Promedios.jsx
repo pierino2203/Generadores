@@ -1,173 +1,131 @@
 import React, { useState } from "react";
+import { Container, Form, Button, Modal, Table, Alert } from "react-bootstrap";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default function Promedios(){
-    const [sampleSize, setSampleSize] = useState(0);
-    const [numbers, setNumbers] = useState([]);
+export default function Promedios() {
+    const [n, setN] = useState("");
     const [za, setZa] = useState("");
-    const [errors, setErrors] = useState({});
-    
-    const handleSampleSizeChange = (e) => {
-        const size = parseInt(e.target.value) || 0;
-        setSampleSize(size);
-        
-        // Initialize or reset the numbers array based on the new size
-        if (size > 0) {
-            setNumbers(Array(size).fill(""));
-        } else {
-            setNumbers([]);
-        }
-        
-        // Clear errors when sample size changes
-        setErrors({});
-    };
-    
-    const validateNumber = (value) => {
-        if (value === "") return true;
-        
-        const num = parseFloat(value);
-        return !isNaN(num);
-    };
-    
-    const validateZa = (value) => {
-        if (value === "") return true;
-        
-        const num = parseFloat(value);
-        return !isNaN(num) && num > 0;
-    };
-    
-    const handleNumberChange = (index, value) => {
-        const newNumbers = [...numbers];
-        newNumbers[index] = value;
-        setNumbers(newNumbers);
-        
-        // Validate the input
-        const newErrors = { ...errors };
-        if (!validateNumber(value)) {
-            newErrors[`number${index}`] = "El valor debe ser un número válido";
-        } else {
-            delete newErrors[`number${index}`];
-        }
-        setErrors(newErrors);
-    };
-    
-    const handleZaChange = (e) => {
-        const value = e.target.value;
-        setZa(value);
-        
-        // Validate Za
-        const newErrors = { ...errors };
-        if (value !== "" && !validateZa(value)) {
-            newErrors.za = "El valor de Za debe ser un número mayor que 0";
-        } else {
-            delete newErrors.za;
-        }
-        setErrors(newErrors);
-    };
-    
+    const [numbers, setNumbers] = useState("");
+    const [result, setResult] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleCloseModal = () => setShowModal(false);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        // Validate all inputs before submission
-        const newErrors = {};
-        let hasErrors = false;
+        // Convertir la cadena de números en un array
+        const numberArray = numbers.split(',').map(num => parseFloat(num.trim()));
         
-        // Check if all numbers are valid
-        numbers.forEach((num, index) => {
-            if (!validateNumber(num)) {
-                newErrors[`number${index}`] = "El valor debe ser un número válido";
-                hasErrors = true;
-            }
+        // Calcular el promedio
+        const promedio = numberArray.reduce((a, b) => a + b, 0) / numberArray.length;
+        
+        // Calcular Z0
+        const z0 = (promedio - 0.5) / (1 / Math.sqrt(12 * numberArray.length));
+        
+        // Comparar |Z0| con Za
+        const conclusion = Math.abs(z0) <= parseFloat(za) 
+            ? "No se rechaza la hipótesis de que los números están distribuidos uniformemente."
+            : "Se rechaza la hipótesis de que los números están distribuidos uniformemente.";
+
+        setResult({
+            numbers: numberArray,
+            promedio,
+            z0,
+            conclusion
         });
-        
-        // Check if Za is valid
-        if (za !== "" && !validateZa(za)) {
-            newErrors.za = "El valor de Za debe ser un número mayor que 0";
-            hasErrors = true;
-        }
-        
-        setErrors(newErrors);
-        
-        if (hasErrors) {
-            return; // Don't proceed if there are errors
-        }
-        
-        // Convert string values to numbers for processing
-        const processedNumbers = numbers.map(num => num === "" ? 0 : parseFloat(num));
-        const processedZa = za === "" ? 0 : parseFloat(za);
-        
-        // Calcular la suma de los elementos
-        const suma = processedNumbers.reduce((total, current) => total + current, 0);
-        const promedio = suma/sampleSize;
-        console.log(promedio)
-        console.log("Suma de los elementos:", suma);
-        const Z0 = ((promedio -0.5)* Math.sqrt(sampleSize))/Math.sqrt(1/12)
-        console.log(Z0)
-        const Res = Math.abs(Z0)
-        if(Res<processedZa){
-            console.log(`${Res} < ${processedZa}, por lo tanto NO SE RECHAZA la hipotesis de que los numeros provienen de un universo uniformemente distribuido`)
-        }else{
-            console.log(`${Res} >= ${processedZa}, por lo tanto  SE RECHAZA la hipotesis de que los numeros provienen de un universo uniformemente distribuido`)
-        }
-        console.log("Sample size:", sampleSize);
-        console.log("Numbers:", processedNumbers);
-        console.log("Za:", processedZa);
+        setShowModal(true);
     };
-    
-    return(
-        <div className="container mt-4">
-            <h1>Prueba de los Promedios</h1>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                    <h3>Ingrese tamaño de la muestra (n):</h3>
-                    <input 
-                        type="number" 
-                        className="form-control" 
-                        value={sampleSize} 
-                        onChange={handleSampleSizeChange}
-                        min="1"
-                    />
+
+    return (
+        <Container className="mt-4">
+            <div className="card shadow-sm">
+                <div className="card-header bg-primary text-white">
+                    <h2 className="mb-0">Prueba de Promedios</h2>
                 </div>
-                
-                {sampleSize > 0 && (
-                    <div className="mb-3">
-                        <h3>Ingrese los {sampleSize} números:</h3>
-                        <div className="row">
-                            {Array.from({ length: sampleSize }).map((_, index) => (
-                                <div className="col-md-3 mb-2" key={index}>
-                                    <input 
-                                        type="number" 
-                                        className={`form-control ${errors[`number${index}`] ? 'is-invalid' : ''}`}
-                                        placeholder={`Número ${index + 1}`}
-                                        value={numbers[index] || ""}
-                                        onChange={(e) => handleNumberChange(index, e.target.value)}
-                                        step="0.01"
-                                    />
-                                    {errors[`number${index}`] && (
-                                        <div className="invalid-feedback">{errors[`number${index}`]}</div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-                
-                <div className="mb-3">
-                    <h3>Ingrese el valor de Za (mayor que 0):</h3>
-                    <input 
-                        type="number" 
-                        className={`form-control ${errors.za ? 'is-invalid' : ''}`}
-                        value={za} 
-                        onChange={handleZaChange}
-                        step="0.01"
-                        min="0.01"
-                    />
-                    {errors.za && (
-                        <div className="invalid-feedback">{errors.za}</div>
+                <div className="card-body">
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Tamaño de la muestra (n):</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={n}
+                                onChange={(e) => setN(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Valor de Za:</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={za}
+                                onChange={(e) => setZa(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Números (separados por comas):</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={numbers}
+                                onChange={(e) => setNumbers(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Button type="submit" variant="primary">Calcular</Button>
+                    </Form>
+                </div>
+            </div>
+
+            <Modal show={showModal} onHide={handleCloseModal} size="lg">
+                <Modal.Header closeButton className="bg-primary text-white">
+                    <Modal.Title>Resultados de la Prueba de Promedios</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {result && (
+                        <>
+                            <h4>Datos de entrada:</h4>
+                            <p>Tamaño de la muestra (n): {n}</p>
+                            <p>Valor de Za: {za}</p>
+
+                            <h4>Números ingresados:</h4>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Número</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {result.numbers.map((num, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{num}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+
+                            <h4>Resultados:</h4>
+                            <p>Promedio: {result.promedio.toFixed(4)}</p>
+                            <p>Z0: {result.z0.toFixed(4)}</p>
+
+                            <Alert variant={Math.abs(result.z0) <= parseFloat(za) ? "success" : "danger"}>
+                                {result.conclusion}
+                            </Alert>
+                        </>
                     )}
-                </div>
-                
-                <button type="submit" className="btn btn-primary">Calcular</button>
-            </form>
-        </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </Container>
     );
 }

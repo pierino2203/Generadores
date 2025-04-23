@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Table } from "react-bootstrap";
+import { Modal, Button, Table, Form, Row, Col, Card, Alert } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Serie() {
@@ -107,19 +107,30 @@ export default function Serie() {
     const newErrors = {};
     let hasErrors = false;
 
+    // Validar que todos los pares tengan valores
     pairs.forEach((pair, index) => {
-      if (!validateNumber(pair.first)) {
+      if (pair.first === "" || pair.second === "") {
+        newErrors[`pair${index}empty`] = "Ambos valores son requeridos";
+        hasErrors = true;
+      } else if (!validateNumber(pair.first)) {
         newErrors[`pair${index}first`] = "El valor debe ser un número entre 0 y 1";
         hasErrors = true;
-      }
-      if (!validateNumber(pair.second)) {
+      } else if (!validateNumber(pair.second)) {
         newErrors[`pair${index}second`] = "El valor debe ser un número entre 0 y 1";
         hasErrors = true;
       }
     });
 
-    if (x !== "" && !validateX(x)) {
+    if (x === "") {
+      newErrors.x = "El valor de x es requerido";
+      hasErrors = true;
+    } else if (!validateX(x)) {
       newErrors.x = "El valor de x debe ser un entero positivo";
+      hasErrors = true;
+    }
+
+    if (x2a !== "" && !validateX2a(x2a)) {
+      newErrors.x2a = "Debe ser positivo";
       hasErrors = true;
     }
 
@@ -150,132 +161,210 @@ export default function Serie() {
 
   return (
     <div className="container mt-4">
-      <h1>Prueba de Series</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Número de pares (n):</label>
-          <input type="number" className="form-control" value={n} onChange={handleNChange} min="1" />
-        </div>
-
-        {n > 0 && (
-          <div>
-            <h5>Pares (x, y):</h5>
-            {pairs.map((pair, index) => (
-              <div className="row mb-2" key={index}>
-                <div className="col">
-                  <input
-                    type="number"
-                    className={`form-control ${errors[`pair${index}first`] ? 'is-invalid' : ''}`}
-                    placeholder={`u${index + 1}.x`}
-                    value={pair.first}
-                    onChange={(e) => handlePairChange(index, 'first', e.target.value)}
-                    step="any"
-                    min="0"
-                    max="1"
+      <Card className="shadow-sm">
+        <Card.Header className="">
+          <h2 className="mb-0">Prueba de Series</h2>
+        </Card.Header>
+        <Card.Body>
+          <Form onSubmit={handleSubmit}>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Número de pares (n):</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    value={n} 
+                    onChange={handleNChange} 
+                    min="1"
+                    className="form-control-sm"
                   />
-                  {errors[`pair${index}first`] && (
-                    <div className="invalid-feedback">{errors[`pair${index}first`]}</div>
-                  )}
-                </div>
-                <div className="col">
-                  <input
-                    type="number"
-                    className={`form-control ${errors[`pair${index}second`] ? 'is-invalid' : ''}`}
-                    placeholder={`u${index + 1}.y`}
-                    value={pair.second}
-                    onChange={(e) => handlePairChange(index, 'second', e.target.value)}
-                    step="any"
-                    min="0"
-                    max="1"
+                </Form.Group>
+              </Col>
+            </Row>
+
+            {n > 0 && (
+              <Card className="mb-3">
+                <Card.Header className="bg-light">Pares (x, y):</Card.Header>
+                <Card.Body>
+                  {pairs.map((pair, index) => (
+                    <div key={index} className="mb-3">
+                      <div className="d-flex align-items-center mb-1">
+                        <span className="me-2 fw-bold">Par {index + 1}:</span>
+                      </div>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label>Valor x:</Form.Label>
+                            <Form.Control
+                              type="number"
+                              className={`form-control-sm ${errors[`pair${index}first`] || errors[`pair${index}empty`] ? 'is-invalid' : ''}`}
+                              placeholder="Ingrese valor x"
+                              value={pair.first}
+                              onChange={(e) => handlePairChange(index, 'first', e.target.value)}
+                              step="any"
+                              min="0"
+                              max="1"
+                            />
+                            {(errors[`pair${index}first`] || errors[`pair${index}empty`]) && (
+                              <div className="invalid-feedback">
+                                {errors[`pair${index}empty`] || errors[`pair${index}first`]}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label>Valor y:</Form.Label>
+                            <Form.Control
+                              type="number"
+                              className={`form-control-sm ${errors[`pair${index}second`] || errors[`pair${index}empty`] ? 'is-invalid' : ''}`}
+                              placeholder="Ingrese valor y"
+                              value={pair.second}
+                              onChange={(e) => handlePairChange(index, 'second', e.target.value)}
+                              step="any"
+                              min="0"
+                              max="1"
+                            />
+                            {(errors[`pair${index}second`] || errors[`pair${index}empty`]) && (
+                              <div className="invalid-feedback">
+                                {errors[`pair${index}empty`] || errors[`pair${index}second`]}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    </div>
+                  ))}
+                </Card.Body>
+              </Card>
+            )}
+
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Valor de x (entero positivo):</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    className={`form-control-sm ${errors.x ? 'is-invalid' : ''}`} 
+                    value={x} 
+                    onChange={handleXChange} 
+                    min="1" 
+                    step="1" 
                   />
-                  {errors[`pair${index}second`] && (
-                    <div className="invalid-feedback">{errors[`pair${index}second`]}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mb-3">
-          <label className="form-label">Valor de x (entero positivo):</label>
-          <input type="number" className={`form-control ${errors.x ? 'is-invalid' : ''}`} value={x} onChange={handleXChange} min="1" step="1" />
-          {errors.x && <div className="invalid-feedback">{errors.x}</div>}
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Valor de χ²ₐ (opcional):</label>
-          <input 
-            type="number" 
-            className={`form-control ${errors.x2a ? 'is-invalid' : ''}`} 
-            value={x2a} 
-            onChange={handleX2aChange} 
-            step="any" 
-            min="0.01" 
-          />
-          {errors.x2a && <div className="invalid-feedback">{errors.x2a}</div>}
-        </div>
-
-        <button type="submit" className="btn btn-primary">Calcular</button>
-      </form>
+                  {errors.x && <div className="invalid-feedback">{errors.x}</div>}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Valor de χ²ₐ (opcional):</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    className={`form-control-sm ${errors.x2a ? 'is-invalid' : ''}`} 
+                    value={x2a} 
+                    onChange={handleX2aChange} 
+                    step="any" 
+                    min="0.01" 
+                  />
+                  {errors.x2a && <div className="invalid-feedback">{errors.x2a}</div>}
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Button type="submit" variant="primary" className="w-100">
+                Calcular
+              </Button>
+            </Row>
+          </Form>
+        </Card.Body>
+      </Card>
 
       {/* Modal para mostrar resultados */}
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className="bg-primary text-white">
           <Modal.Title>Resultados de la Prueba de Series</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {result && (
             <div>
-              <h5>Datos ingresados:</h5>
-              <p><strong>Número de pares (n):</strong> {result.pairs.length}</p>
-              <p><strong>Valor de x:</strong> {result.x}</p>
-              {result.x2a && <p><strong>Valor de χ²ₐ:</strong> {result.x2a}</p>}
-              
-              <h5 className="mt-3">Pares ingresados:</h5>
-              <Table striped bordered hover size="sm">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>u<sub>i</sub>.x</th>
-                    <th>u<sub>i</sub>.y</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.pairs.map((pair, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>{pair.first.toFixed(4)}</td>
-                      <td>{pair.second.toFixed(4)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-              
-              <h5 className="mt-3">Resultados:</h5>
-              <p><strong>Fe (esperado por celda):</strong> {result.fe.toFixed(3)}</p>
-              <p><strong>Chi-cuadrado (χ²):</strong> {result.chiCuadrado.toFixed(3)}</p>
+              <h5 className="border-bottom pb-2">Datos ingresados:</h5>
+              <Row className="mb-3">
+                <Col md={6}>
+                  <p><strong>Número de pares (n):</strong> {result.pairs.length}</p>
+                </Col>
+                <Col md={6}>
+                  <p><strong>Valor de x:</strong> {result.x}</p>
+                </Col>
+              </Row>
               {result.x2a && (
-                <p><strong>χ² crítico:</strong> {result.x2a} → {result.chiCuadrado > result.x2a ? "Se rechaza H₀" : "No se rechaza H₀"}</p>
+                <p><strong>Valor de χ²ₐ:</strong> {result.x2a}</p>
               )}
               
-              <h5 className="mt-3">Matriz de Frecuencias Observadas (Fo):</h5>
-              <Table striped bordered hover size="sm">
-                <tbody>
-                  {result.fo.map((row, i) => (
-                    <tr key={i}>
-                      {row.map((val, j) => (
-                        <td key={j} className="text-center">{val}</td>
+              <h5 className="border-bottom pb-2 mt-3">Pares ingresados:</h5>
+              <div className="table-responsive">
+                <Table striped bordered hover size="sm" className="mb-3">
+                  <thead className="table-primary">
+                    <tr>
+                      <th>#</th>
+                      <th>u<sub>i</sub>.x</th>
+                      <th>u<sub>i</sub>.y</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.pairs.map((pair, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{pair.first.toFixed(4)}</td>
+                        <td>{pair.second.toFixed(4)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+              
+              <h5 className="border-bottom pb-2">Resultados:</h5>
+              <Row className="mb-3">
+                <Col md={6}>
+                  <p><strong>Fe (esperado por celda):</strong> {result.fe.toFixed(3)}</p>
+                </Col>
+                <Col md={6}>
+                  <p><strong>χ²:</strong> {result.chiCuadrado.toFixed(3)}</p>
+                </Col>
+              </Row>
+              
+              {result.x2a && (
+                <Alert variant={result.chiCuadrado > result.x2a ? "danger" : "success"}>
+                  <strong>Conclusión:</strong> {result.chiCuadrado > result.x2a ? `${result.chiCuadrado}>${result.x2a} Se rechaza H₀` : `${result.chiCuadrado}<${result.x2a} No se rechaza H₀`}
+                </Alert>
+              )}
+              
+              <h5 className="border-bottom pb-2 mt-3">Matriz de Frecuencias Observadas (Fo):</h5>
+              <div className="table-responsive">
+                <Table striped bordered hover size="sm">
+                  <thead className="table-primary">
+                    <tr>
+                      <th>i\j</th>
+                      {Array.from({ length: result.x }, (_, i) => (
+                        <th key={i}>{i+1}</th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {result.fo.map((row, i) => (
+                      <tr key={i}>
+                        <th>{i+1}</th>
+                        {row.map((val, j) => (
+                          <td key={j} className="text-center">{val}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          <Button variant="primary" onClick={handleCloseModal}>
             Cerrar
           </Button>
         </Modal.Footer>
