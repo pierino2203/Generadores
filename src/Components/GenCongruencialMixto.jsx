@@ -120,7 +120,7 @@ export default function GenCongruencialMixto() {
             </Col>
             <Col md={4} className="mb-3">
               <Form.Group className="text-center">
-                <Form.Label className="text-primary fw-bold">c(digitos de presicion):</Form.Label>
+                <Form.Label className="text-primary fw-bold">c(digitos de precision):</Form.Label>
                 <Form.Control
                   type="number"
                   name="digitos"
