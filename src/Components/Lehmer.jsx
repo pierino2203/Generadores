@@ -146,7 +146,7 @@ export default function Lehmer() {
                                         <strong>Separamos n{index}*t, k={resultados.k} digitos de la izq=</strong> {resultado.numero1}----{resultado.numero2}
                                     </Card.Text>
                                     <Card.Text className="mb-1">
-                                        <strong>n{index+1}=</strong>{resultado.numero1}-{resultado.numero2}={resultado.nuevaSemilla}
+                                        <strong>n{index+1}=</strong>{resultado.numero2}-{resultado.numero1}={resultado.nuevaSemilla}
                                     </Card.Text>
                                     <Card.Text className="mb-1">
                                         <strong>u{index+1}=</strong> {resultado.u}
